@@ -1,0 +1,124 @@
+using Microsoft.EntityFrameworkCore;
+using MyMovieList.Data;
+using MyMovieList.Data.Models;
+using Microsoft.AspNetCore.Identity;
+using MyMovieList.Business.Configuration;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using MyMovieList.Business.Interfaces.Services;
+using MyMovieList.Business.Services;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c => 
+{
+    c.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
+        {
+            In = ParameterLocation.Header,
+            Description = "Please enter into field the word 'Bearer' following by space and JWT",
+            Name = "Authorization",
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer",
+        });
+
+    c.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
+        {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer",
+                                },
+                                Scheme = "oauth2",
+                                Name = "Bearer",
+                                In = ParameterLocation.Header,
+                            },
+                            new List<string>()
+                        },
+        });
+});
+
+builder.Services.AddDbContext<ApiDbContext>(opt =>
+{
+    _ = opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
+});
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
+{
+    opt.SignIn.RequireConfirmedAccount = false;
+
+    opt.Password.RequireDigit = false;
+    opt.Password.RequireLowercase = false;
+    opt.Password.RequireNonAlphanumeric = false;
+    opt.Password.RequireUppercase = false;
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<ApiDbContext>();
+
+var jwtSection = builder.Configuration.GetSection("JwtBearerTokenSettings");
+builder.Services.Configure<JwtBearerTokenSettings>(jwtSection);
+var jwtBearerTokenSettings = jwtSection.Get<JwtBearerTokenSettings>()!;
+var key = Encoding.ASCII.GetBytes(jwtBearerTokenSettings.SecretKey);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = true,
+        ValidIssuer = jwtBearerTokenSettings.Issuer,
+        ValidateAudience = true,
+        ValidAudience = jwtBearerTokenSettings.Audience,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero, // To immediately reject the access token
+    };
+});
+
+builder.Services.AddTransient<SeedData>();
+builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IAuthService, AuthService>();
+
+WebApplication app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    _ = app.UseSwagger();
+    _ = app.UseSwaggerUI();
+}
+
+using (var serviceScope = app.Services.CreateScope())
+{
+    var seedData = serviceScope.ServiceProvider.GetService<SeedData>();
+    await seedData!.SeedAllDataASync();
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
