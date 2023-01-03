@@ -25,15 +25,33 @@ public class TestController : ControllerBase
 
     [Authorize]
     [HttpGet("[action]")]
-    public IActionResult LoggedIn()
+    public async Task<IActionResult> LoggedIn()
     {
-        return Ok(new { Message = $"Logged user is {_userManager.GetUserName(User)} " });
+        var user = await _userManager.GetUserAsync(User);
+        return Ok(new { Message = $"Logged user is {user!.UserName}" });
     }
 
     [Authorize(Roles = UserRoles.SuperAdmin)]
     [HttpGet("[action]")]
-    public IActionResult SuperAdmin()
+    public async Task<IActionResult> SuperAdmins()
     {
-        return Ok(new { Message = $"SuperAdmin user is {_userManager.GetUserName(User)} " });
+        var user = await _userManager.GetUserAsync(User);
+        return Ok(new { Message = $"SuperAdmin user is {user!.UserName}" });
+    }
+
+    [Authorize(Roles = $"{UserRoles.SuperAdmin},{UserRoles.Admin}")]
+    [HttpGet("[action]")]
+    public async Task<IActionResult> Admins()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        return Ok(new { Message = $"Admin user is {user!.UserName}" });
+    }
+
+    [Authorize(Roles = $"{UserRoles.SuperAdmin},{UserRoles.Admin},{UserRoles.User}")]
+    [HttpGet("[action]")]
+    public async Task<IActionResult> Users()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        return Ok(new { Message = $"User is {user!.UserName}" });
     }
 }

@@ -22,12 +22,12 @@ public class ApiDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<ApplicationUser>()
             .HasMany(u => u.RefreshTokens)
             .WithOne(t => t.User)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<AuthHistory>()
             .HasOne(ah => ah.ApplicationUser)
             .WithMany()
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.SeedUserRoles();
     }

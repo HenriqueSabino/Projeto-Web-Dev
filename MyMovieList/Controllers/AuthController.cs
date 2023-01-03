@@ -9,7 +9,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MyMovieList.Business.Configuration;
 using MyMovieList.Business.Interfaces.Services;
-using MyMovieList.Data;
 using MyMovieList.Data.Models;
 using MyMovieList.Models;
 

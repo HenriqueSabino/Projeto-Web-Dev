@@ -23,7 +23,7 @@ public class AuthService : IAuthService
 
     public async Task<bool> RevokeRefreshToken(ApplicationUser user, RefreshToken refreshToken, string? remoteIpAddress)
     {
-        user.LastLoginDate = DateTime.UtcNow;
+        user.LastLogoutDate = DateTime.UtcNow;
         refreshToken.RevokedByIp = remoteIpAddress;
         refreshToken.RevokedOn = DateTime.UtcNow;
 
