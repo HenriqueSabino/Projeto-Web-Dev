@@ -14,6 +14,8 @@ public class ApiDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<AuthHistory> AuthHistories { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Movie> Movies { get; set; }
+    public DbSet<SeedState> SeedStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

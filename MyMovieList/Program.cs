@@ -9,6 +9,7 @@ using MyMovieList.Business.Interfaces.Services;
 using MyMovieList.Business.Services;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using MyMovieList.HostedServices;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +68,18 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApiDbContext>();
 
+builder.Services.AddHostedService<MovieSeedService>();
+
+var corsPolicy = "MyMovieListCorsPolicy";
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy(name: corsPolicy, policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+            .AllowAnyMethod();
+    });
+});
+
 var jwtSection = builder.Configuration.GetSection("JwtBearerTokenSettings");
 builder.Services.Configure<JwtBearerTokenSettings>(jwtSection);
 var jwtBearerTokenSettings = jwtSection.Get<JwtBearerTokenSettings>()!;
@@ -94,9 +107,15 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+var tmdbSection = builder.Configuration.GetSection("Tmdb");
+builder.Services.Configure<TmdbApiSettings>(tmdbSection);
+var tmdbOptions = tmdbSection.Get<TmdbApiSettings>()!;
+
 builder.Services.AddTransient<SeedData>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IAuthService, AuthService>();
+builder.Services.AddTransient<IMovieService, MovieService>();
+builder.Services.AddTransient<ISeedStateService, SeedStateService>();
 
 WebApplication app = builder.Build();
 
@@ -114,6 +133,8 @@ using (var serviceScope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(corsPolicy);
 
 app.UseAuthentication();
 
