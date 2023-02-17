@@ -9,6 +9,8 @@ public class Movie
 
     public string Source { get; set; }
 
+    public string Summary { get; set; }
+
     public string Title { get; set; }
 
     public string ImagePath { get; set; }

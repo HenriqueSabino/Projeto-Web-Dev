@@ -19,4 +19,7 @@ public class TmdbMovie
 
     [JsonPropertyName("vote_count")]
     public int VoteCount { get; set; }
+
+    [JsonPropertyName("overview")]
+    public string Overview { get; set; }
 }

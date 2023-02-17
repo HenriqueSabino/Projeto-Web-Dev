@@ -1,3 +1,4 @@
+using System.Web;
 using MyMovieList.Business.Configuration;
 using MyMovieList.Business.Interfaces.Services;
 using MyMovieList.Data;
@@ -51,10 +52,16 @@ public class MovieSeedService : BackgroundService
                 while (totalPages < 0 || page <= totalPages)
                 {
                     using var httpClient = new HttpClient();
+                    var query = HttpUtility.ParseQueryString(string.Empty);
+                    query["api_key"] = _tmdbApiSettings.ApiKey;
+                    query["page"] = page.ToString();
+                    query["language"] = "pt-BR";
+                    query["sort_by"] = "primary_release_date.asc";
+                    query["year"] = year.ToString();
+                    query["vote_average.gte"] = "6.1";
 
-                    var results = await httpClient.GetFromJsonAsync<TmdbApiResult<TmdbMovie>>(
-                        $"{_tmdbApiSettings.BaseUrl}/discover/movie?api_key={_tmdbApiSettings.ApiKey}&page={page}&language=pt-BR&sort_by=primary_release_date.asc&year=${year}&vote_average.gte=6.1",
-                         cancellationToken);
+                    var url = $"{_tmdbApiSettings.BaseUrl}/discover/movie?{query}";
+                    var results = await httpClient.GetFromJsonAsync<TmdbApiResult<TmdbMovie>>(url, cancellationToken);
                     totalPages = results!.TotalPages;
 
                     var movies = new List<Movie>();
@@ -63,6 +70,7 @@ public class MovieSeedService : BackgroundService
                         ExternalId = x.Id,
                         Title = x.Title,
                         ImagePath = x.PosterPath,
+                        Summary = x.Overview,
                         Source = _tmdbApiSettings.BaseUrl,
                         VoteAverage = x.VoteAverage,
                         VoteCount = x.VoteCount,
