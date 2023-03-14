@@ -1,10 +1,8 @@
 using System.Web;
 using MyMovieList.Business.Configuration;
 using MyMovieList.Business.Interfaces.Services;
-using MyMovieList.Data;
 using MyMovieList.Data.Models;
 using MyMovieList.Models;
-using Newtonsoft.Json;
 
 namespace MyMovieList.HostedServices;
 

@@ -53,13 +53,13 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddDbContext<ApiDbContext>(opt =>
 {
-    if (builder.Configuration.GetValue<bool>("UseSQLLite"))
+    if (builder.Configuration.GetValue<bool>("UseSQLite"))
     {
         _ = opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
     }
     else
     {
-        _ = opt.UseSqlite(builder.Configuration.GetConnectionString("SQLLite")!);
+        _ = opt.UseSqlite(builder.Configuration.GetConnectionString("SQLite")!);
     }
 });
 
