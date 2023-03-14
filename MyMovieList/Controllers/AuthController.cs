@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,9 +12,11 @@ using MyMovieList.Business.Configuration;
 using MyMovieList.Business.Interfaces.Services;
 using MyMovieList.Data.Models;
 using MyMovieList.Models;
+using MyMovieList.Models.DTO;
 
 namespace MyMovieList.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class AuthController : ControllerBase
@@ -31,6 +34,7 @@ public class AuthController : ControllerBase
         _jwtBearerTokenSettings = jwtBearerTokenSettings.Value;
     }
 
+    [AllowAnonymous]
     [HttpPost("[action]")]
     public async Task<IActionResult> Login(LoginCredentials loginCredentials)
     {
@@ -47,7 +51,19 @@ public class AuthController : ControllerBase
             return BadRequest(new { Success = false, Message = "Login failed, please try again later!" });
         }
 
-        return Ok(new { Token = tokens.Item1, RefreshToken = tokens.Item2, Success = true, Message = "Login successful" });
+        return Ok(new
+        {
+            Token = tokens.Item1,
+            RefreshToken = tokens.Item2,
+            Success = true,
+            User = new UserAuthDTO
+            {
+                Id = identityUser.Id,
+                Name = identityUser.UserName,
+                Email = identityUser.Email
+            },
+            Message = "Login successful"
+        });
     }
 
     [HttpPost("[action]")]
@@ -132,14 +148,9 @@ public class AuthController : ControllerBase
 
     [HttpPost]
     [Route("Logout")]
-    public async Task<IActionResult> Logout(RefreshTokenRequest refreshToken)
+    public async Task<IActionResult> Logout()
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new { Success = false, Message = "Failed" });
-        }
-
-        var identityUser = _userManager.Users.Include(x => x.RefreshTokens).FirstOrDefault(x => x.RefreshTokens.Any(y => y.Token == refreshToken.Token));
+        var identityUser = await _userManager.Users.Include(x => x.RefreshTokens).FirstOrDefaultAsync(x => x.Id == _userManager.GetUserId(User));
 
         if (identityUser is null)
         {
@@ -147,7 +158,7 @@ public class AuthController : ControllerBase
         }
 
         // Get existing refresh token if it is valid and revoke it
-        var existingRefreshToken = identityUser.RefreshTokens.First(x => x.Token == refreshToken.Token);
+        var existingRefreshToken = identityUser.RefreshTokens.First(x => x.RevokedOn == DateTime.MinValue);
 
         if (!string.IsNullOrEmpty(existingRefreshToken.RevokedByIp) ||
             existingRefreshToken.RevokedOn != DateTime.MinValue ||

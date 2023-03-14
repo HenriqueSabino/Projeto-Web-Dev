@@ -1,6 +1,4 @@
-using MyMovieList.Business.Globals;
-
-namespace MyMovieList.Models;
+namespace MyMovieList.Models.DTO;
 
 #nullable disable
 public class UserCreationDTO
