@@ -53,14 +53,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddDbContext<ApiDbContext>(opt =>
 {
-    if (builder.Configuration.GetValue<bool>("UseSQLLite"))
-    {
-        _ = opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
-    }
-    else
-    {
-        _ = opt.UseSqlite(builder.Configuration.GetConnectionString("SQLLite")!);
-    }
+    _ = opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
 });
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
@@ -82,9 +75,8 @@ builder.Services.AddCors(opt =>
 {
     opt.AddPolicy(name: corsPolicy, policy =>
     {
-        policy.WithOrigins(builder.Configuration.GetValue<string>("FrontUrl")!)
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+        policy.WithOrigins("http://localhost:3000")
+            .AllowAnyMethod();
     });
 });
 

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using MyMovieList.Business.Globals;
 using MyMovieList.Data.Models;
 using MyMovieList.Models;
-using MyMovieList.Models.DTO;
 
 namespace MyMovieList.Controllers;
 
