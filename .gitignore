@@ -73,7 +73,7 @@ _[Ss]cripts
 *.nupkg
 *.ncrunchsolution
 *.dot[Cc]over
-#Sqlite databases
-*.db
-*.db-shm
-*.db-wal
+#Environment variables
+appsettings.json
+appsettings.Development.json
+appsettings.Docker.json

@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  MyMovieListDB:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: my-movie-list-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=DataPass@2022
+    ports:
+      - 1450:1433
+    restart: always
+  sistema-de-envios:
+    build:
+      dockerfile: "./Dockerfile"
+    container_name: my-movie-list
+    ports:
+      - 5000:80
+    depends_on:
+      - MyMovieListDB
+    restart: always
+
+networks:
+  default:
+    name: webdev-network
+    external: true
