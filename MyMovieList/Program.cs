@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using MyMovieList.HostedServices;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -53,14 +52,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddDbContext<ApiDbContext>(opt =>
 {
-    if (builder.Configuration.GetValue<bool>("UseSQLite"))
-    {
-        _ = opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
-    }
-    else
-    {
-        _ = opt.UseSqlite(builder.Configuration.GetConnectionString("SQLite")!);
-    }
+    _ = opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
 });
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
@@ -128,7 +120,7 @@ builder.Services.AddTransient<ISeedStateService, SeedStateService>();
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Docker")
 {
     _ = app.UseSwagger();
     _ = app.UseSwaggerUI();
