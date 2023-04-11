@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace MyMovieList.Data.Models;
 
 #nullable disable
@@ -18,4 +20,7 @@ public class Movie
     public float VoteAverage { get; set; }
 
     public int VoteCount { get; set; }
+
+    [NotMapped]
+    public int WatchedCount { get; set; }
 }

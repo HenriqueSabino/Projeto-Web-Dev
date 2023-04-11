@@ -31,6 +31,16 @@ public class ApiDbContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.Entity<WatchListItem>()
+            .HasOne(wli => wli.User)
+            .WithMany(u => u.WatchList)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<WatchListItem>()
+            .HasOne(u => u.Movie)
+            .WithMany()
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.SeedUserRoles();
     }
 }

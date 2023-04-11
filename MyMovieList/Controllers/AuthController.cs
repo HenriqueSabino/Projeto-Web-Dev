@@ -66,6 +66,7 @@ public class AuthController : ControllerBase
         });
     }
 
+    [AllowAnonymous]
     [HttpPost("[action]")]
     public async Task<IActionResult> RefreshToken(RefreshTokenRequest refreshToken)
     {

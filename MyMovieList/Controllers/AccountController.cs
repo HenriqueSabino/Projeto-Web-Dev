@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyMovieList.Business.Globals;
 using MyMovieList.Data.Models;
 using MyMovieList.Models;
@@ -8,6 +10,7 @@ using MyMovieList.Models.DTO;
 namespace MyMovieList.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("[controller]")]
 public class AccountController : ControllerBase
 {
@@ -21,6 +24,7 @@ public class AccountController : ControllerBase
         _roleManager = roleManager;
     }
 
+    [AllowAnonymous]
     [HttpPost("[action]")]
     public async Task<IActionResult> Register(UserCreationDTO userCreationDTO)
     {
@@ -63,14 +67,23 @@ public class AccountController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("[action]/{userId}")]
+    [HttpDelete("[action]/{userId}")]
     public async Task<IActionResult> Delete(string userId)
     {
+        var loggedUser = await _userManager.GetUserAsync(User);
         var user = await _userManager.FindByIdAsync(userId);
 
         if (user is null)
         {
             return NotFound();
+        }
+
+        if (!await _userManager.IsInRoleAsync(loggedUser!, UserRoles.SuperAdmin) ||
+            !await _userManager.IsInRoleAsync(loggedUser!, UserRoles.Admin) ||
+            (await _userManager.IsInRoleAsync(loggedUser!, UserRoles.Admin) && await _userManager.IsInRoleAsync(user, UserRoles.Admin)) ||
+            loggedUser!.Id != userId)
+        {
+            return Unauthorized("Only the proprietor of the account or users with higher priviledges can delete this account.");
         }
 
         var result = await _userManager.DeleteAsync(user);
@@ -82,5 +95,23 @@ public class AccountController : ControllerBase
         }
 
         return Ok();
+    }
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> GetWatchList()
+    {
+        var loggedUserId = _userManager.GetUserId(User);
+        var loggedUser = await _userManager.Users
+            .Include(x => x.WatchList)
+            .ThenInclude(x => x.Movie)
+            .SingleOrDefaultAsync(x => x.Id == loggedUserId);
+
+        var watchListDTO = loggedUser!.WatchList?.Select(x => new WatchListDTO
+        {
+            Movie = x.Movie,
+            WatchStatus = x.WatchStatus
+        });
+
+        return Ok(watchListDTO ?? new List<WatchListDTO>());
     }
 }
