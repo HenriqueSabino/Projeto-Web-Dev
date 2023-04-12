@@ -26,12 +26,15 @@ public class UserService : IUserService
 
         user.WatchList ??= new List<WatchListItem>();
 
-        user.WatchList.Add(new WatchListItem
+        if (!user.WatchList.Any(x => x.MovieId == movieId))
         {
-            MovieId = movieId,
-            UserId = user.Id,
-            WatchStatus = watchStatus
-        });
+            user.WatchList.Add(new WatchListItem
+            {
+                MovieId = movieId,
+                UserId = user.Id,
+                WatchStatus = watchStatus
+            });
+        }
 
         _context.Users.Update(user);
 
