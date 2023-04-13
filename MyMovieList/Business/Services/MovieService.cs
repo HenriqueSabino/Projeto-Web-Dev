@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using MyMovieList.Business.Interfaces.Services;
 using MyMovieList.Data;
 using MyMovieList.Data.Models;
+using MyMovieList.Data.Models.Enums;
+using MyMovieList.Models.DTO;
 
 namespace MyMovieList.Business.Services;
 
@@ -19,9 +21,31 @@ public class MovieService : IMovieService
         return await _context.Movies.FindAsync(movieId);
     }
 
-    public async Task<IEnumerable<Movie>> GetPaged(int page, int pageSize)
+    public async Task<IEnumerable<MovieDTO>> GetPaged(string? search, int page, int pageSize)
     {
-        return await _context.Movies.AsNoTracking().Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        var query = _context.Movies.AsNoTracking()
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(m => m.Title.Contains(search));
+        }
+
+        return await query
+            .Skip(pageSize * (page - 1))
+            .Take(pageSize)
+            .Select(m => new MovieDTO
+            {
+                Id = m.Id,
+                ImagePath = m.ImagePath,
+                Source = m.Source,
+                Summary = m.Summary,
+                Title = m.Title,
+                VoteAverage = m.Reviews.Count > 0 ? m.Reviews.Average(x => x.Vote) : m.VoteAverage,
+                VoteCount = m.Reviews.Count > 0 ? m.Reviews.Count : m.VoteCount,
+                WatchedCount = m.WatchListItems.Count(wli => wli.WatchStatus == WatchStatus.Watched)
+            })
+            .ToListAsync();
     }
 
     public async Task Add(Movie movie)
@@ -56,5 +80,10 @@ public class MovieService : IMovieService
         {
             await Delete(movie);
         }
+    }
+
+    public async Task<bool> Exists(Guid movieId)
+    {
+        return await _context.Movies.FindAsync(movieId) is not null;
     }
 }

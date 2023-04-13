@@ -3,23 +3,30 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyMovieList.Business.Globals;
+using MyMovieList.Business.Interfaces.Services;
 using MyMovieList.Data.Models;
 using MyMovieList.Models;
 using MyMovieList.Models.DTO;
 
 namespace MyMovieList.Controllers;
 
-[ApiController]
 [Authorize]
+[ApiController]
 [Route("[controller]")]
 public class AccountController : ControllerBase
 {
+    private readonly IUserService _userService;
+
     private readonly UserManager<ApplicationUser> _userManager;
 
     private readonly RoleManager<IdentityRole> _roleManager;
 
-    public AccountController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+    public AccountController(
+        IUserService userService,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager)
     {
+        _userService = userService;
         _userManager = userManager;
         _roleManager = roleManager;
     }
@@ -94,24 +101,19 @@ public class AccountController : ControllerBase
             return BadRequest(errorMessage);
         }
 
-        return Ok();
+        return Accepted();
     }
 
     [HttpGet("[action]")]
-    public async Task<IActionResult> GetWatchList()
+    public async Task<IActionResult> GetWatchList(int page, int pageSize)
     {
-        var loggedUserId = _userManager.GetUserId(User);
-        var loggedUser = await _userManager.Users
-            .Include(x => x.WatchList)
-            .ThenInclude(x => x.Movie)
-            .SingleOrDefaultAsync(x => x.Id == loggedUserId);
-
-        var watchListDTO = loggedUser!.WatchList?.Select(x => new WatchListDTO
+        if (page <= 0 && pageSize <= 0)
         {
-            Movie = x.Movie,
-            WatchStatus = x.WatchStatus
-        });
+            return BadRequest("Page number and page size should be greater than 0.");
+        }
 
-        return Ok(watchListDTO ?? new List<WatchListDTO>());
+        var loggedUserId = _userManager.GetUserId(User);
+
+        return Ok(await _userService.GetUserWatchList(loggedUserId!, page, pageSize));
     }
 }

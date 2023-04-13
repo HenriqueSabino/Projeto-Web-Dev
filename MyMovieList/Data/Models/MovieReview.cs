@@ -1,15 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
-using MyMovieList.Data.Models.Enums;
 
 namespace MyMovieList.Data.Models;
 
 #nullable disable
-
-[PrimaryKey(nameof(this.UserId), nameof(this.MovieId))]
-public class WatchListItem
+public class MovieReview
 {
+    [Key]
+    public Guid Id { get; set; }
+
     [ForeignKey(nameof(this.UserId))]
     public ApplicationUser User { get; set; }
 
@@ -20,5 +19,7 @@ public class WatchListItem
 
     public Guid MovieId { get; set; }
 
-    public WatchStatus WatchStatus { get; set; }
+    public int Vote { get; set; }
+
+    public string Review { get; set; }
 }

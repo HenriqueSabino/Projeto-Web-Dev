@@ -13,4 +13,6 @@ public class ApplicationUser : IdentityUser
     public DateTime LastLogoutDate { get; internal set; }
 
     public List<WatchListItem> WatchList { get; set; }
+
+    public List<MovieReview> Reviews { get; set; }
 }

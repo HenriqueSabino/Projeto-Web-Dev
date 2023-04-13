@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyMovieList.Business.Globals;
 using MyMovieList.Business.Interfaces.Services;
 using MyMovieList.Data.Models;
@@ -26,14 +27,14 @@ public class MovieController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("[action]")]
-    public async Task<IActionResult> GetMovies(int page, int pageSize)
+    public async Task<IActionResult> GetMovies(string? search, int page, int pageSize)
     {
         if (page <= 0 || pageSize <= 0)
         {
-            return BadRequest();
+            return BadRequest("Page number and page size should be greater than 0.");
         }
 
-        return Ok(await _movieService.GetPaged(page, pageSize));
+        return Ok(await _movieService.GetPaged(search, page, pageSize));
     }
 
     [HttpPost("[action]")]
@@ -50,5 +51,21 @@ public class MovieController : ControllerBase
         await _userService.AddMovieToWatchList(user!, movieId, watchStatus);
 
         return Ok();
+    }
+
+    [HttpDelete("[action]")]
+    public async Task<IActionResult> RemoveFromWatchList(Guid movieId)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var movie = await _movieService.Get(movieId);
+
+        if (movie is null)
+        {
+            return NotFound("The movie specified was not found.");
+        }
+
+        await _userService.RemoveMovieFromWatchList(user!, movieId);
+
+        return Accepted();
     }
 }

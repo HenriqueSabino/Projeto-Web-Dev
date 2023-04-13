@@ -13,8 +13,15 @@ public class ApiDbContext : IdentityDbContext<ApplicationUser>
     }
 
     public DbSet<AuthHistory> AuthHistories { get; set; }
+
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+
     public DbSet<Movie> Movies { get; set; }
+
+    public DbSet<WatchListItem> WatchListItems { get; set; }
+
+    public DbSet<MovieReview> MovieReviews { get; set; }
+
     public DbSet<SeedState> SeedStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -38,7 +45,17 @@ public class ApiDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<WatchListItem>()
             .HasOne(u => u.Movie)
-            .WithMany()
+            .WithMany(m => m.WatchListItems)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<MovieReview>()
+            .HasOne(mr => mr.User)
+            .WithMany(u => u.Reviews)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.Entity<MovieReview>()
+            .HasOne(mr => mr.Movie)
+            .WithMany(m => m.Reviews)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.SeedUserRoles();

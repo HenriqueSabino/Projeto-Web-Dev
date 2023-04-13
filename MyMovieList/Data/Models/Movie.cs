@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using MyMovieList.Data.Models.Enums;
 
 namespace MyMovieList.Data.Models;
 
@@ -21,6 +22,16 @@ public class Movie
 
     public int VoteCount { get; set; }
 
+    public List<MovieReview> Reviews { get; set; }
+
+    public List<WatchListItem> WatchListItems { get; set; }
+
     [NotMapped]
-    public int WatchedCount { get; set; }
+    public double LocalVoteAverage => Reviews.Average(mr => mr.Vote);
+
+    [NotMapped]
+    public int LocalVoteCount => Reviews.Count;
+
+    [NotMapped]
+    public int WatchedCount => WatchListItems.Count(wli => wli.WatchStatus == WatchStatus.Watched);
 }

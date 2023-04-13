@@ -1,4 +1,5 @@
 using MyMovieList.Data.Models;
+using MyMovieList.Models.DTO;
 
 namespace MyMovieList.Business.Interfaces.Services;
 
@@ -6,7 +7,7 @@ public interface IMovieService
 {
     Task<Movie?> Get(Guid movieId);
 
-    Task<IEnumerable<Movie>> GetPaged(int page, int pageSize);
+    Task<IEnumerable<MovieDTO>> GetPaged(string? search, int page, int pageSize);
 
     Task Add(Movie movie);
 
@@ -17,4 +18,6 @@ public interface IMovieService
     Task Delete(Movie movie);
 
     Task Delete(Guid movieId);
+
+    Task<bool> Exists(Guid movieId);
 }
