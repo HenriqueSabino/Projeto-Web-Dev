@@ -118,6 +118,8 @@ builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddTransient<IMovieService, MovieService>();
 builder.Services.AddTransient<ISeedStateService, SeedStateService>();
+builder.Services.AddTransient<IReviewService, ReviewService>();
+builder.Services.AddTransient<IWatchListService, WatchListService>();
 
 WebApplication app = builder.Build();
 

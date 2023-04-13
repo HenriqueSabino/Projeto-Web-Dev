@@ -103,17 +103,4 @@ public class AccountController : ControllerBase
 
         return Accepted();
     }
-
-    [HttpGet("[action]")]
-    public async Task<IActionResult> GetWatchList(int page, int pageSize)
-    {
-        if (page <= 0 && pageSize <= 0)
-        {
-            return BadRequest("Page number and page size should be greater than 0.");
-        }
-
-        var loggedUserId = _userManager.GetUserId(User);
-
-        return Ok(await _userService.GetUserWatchList(loggedUserId!, page, pageSize));
-    }
 }

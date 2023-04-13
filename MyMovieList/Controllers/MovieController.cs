@@ -36,36 +36,4 @@ public class MovieController : ControllerBase
 
         return Ok(await _movieService.GetPaged(search, page, pageSize));
     }
-
-    [HttpPost("[action]")]
-    public async Task<IActionResult> AddToWatchList(Guid movieId, WatchStatus watchStatus = WatchStatus.WantToWatch)
-    {
-        var user = await _userManager.GetUserAsync(User);
-        var movie = await _movieService.Get(movieId);
-
-        if (movie is null)
-        {
-            return NotFound("The movie specified was not found.");
-        }
-
-        await _userService.AddMovieToWatchList(user!, movieId, watchStatus);
-
-        return Ok();
-    }
-
-    [HttpDelete("[action]")]
-    public async Task<IActionResult> RemoveFromWatchList(Guid movieId)
-    {
-        var user = await _userManager.GetUserAsync(User);
-        var movie = await _movieService.Get(movieId);
-
-        if (movie is null)
-        {
-            return NotFound("The movie specified was not found.");
-        }
-
-        await _userService.RemoveMovieFromWatchList(user!, movieId);
-
-        return Accepted();
-    }
 }
