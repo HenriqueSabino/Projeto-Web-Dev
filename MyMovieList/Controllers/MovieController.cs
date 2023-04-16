@@ -1,11 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyMovieList.Business.Globals;
 using MyMovieList.Business.Interfaces.Services;
-using MyMovieList.Data.Models;
-using MyMovieList.Data.Models.Enums;
 
 namespace MyMovieList.Controllers;
 
@@ -15,14 +10,10 @@ namespace MyMovieList.Controllers;
 public class MovieController : ControllerBase
 {
     private readonly IMovieService _movieService;
-    private readonly IUserService _userService;
-    private readonly UserManager<ApplicationUser> _userManager;
 
-    public MovieController(IMovieService movieService, IUserService userService, UserManager<ApplicationUser> userManager)
+    public MovieController(IMovieService movieService)
     {
         _movieService = movieService;
-        _userService = userService;
-        _userManager = userManager;
     }
 
     [AllowAnonymous]

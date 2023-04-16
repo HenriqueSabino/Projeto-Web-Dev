@@ -30,6 +30,17 @@ public class WatchListService : IWatchListService
         }
     }
 
+    public async Task EditWatchListItemStatus(string userId, Guid movieId, WatchStatus watchStatus)
+    {
+        var watchListItem = await _context.WatchListItems.FindAsync(userId, movieId);
+
+        if (watchListItem is not null)
+        {
+            watchListItem.WatchStatus = watchStatus;
+            await _context.SaveChangesAsync();
+        }
+    }
+
     public async Task<IEnumerable<WatchListItem>> GetUserWatchList(string userId, int page, int pageSize)
     {
         return await _context.WatchListItems.AsNoTracking()

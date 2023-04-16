@@ -7,7 +7,9 @@ public interface IWatchListService
 {
     Task<IEnumerable<WatchListItem>> GetUserWatchList(string userId, int page, int pageSize);
 
-    Task AddMovieToWatchList(string userId, Guid movidId, WatchStatus watchStatus);
+    Task AddMovieToWatchList(string userId, Guid movieId, WatchStatus watchStatus);
 
-    Task RemoveMovieFromWatchList(string userId, Guid movidId);
+    Task RemoveMovieFromWatchList(string userId, Guid movieId);
+
+    Task EditWatchListItemStatus(string userId, Guid movieId, WatchStatus watchStatus);
 }
