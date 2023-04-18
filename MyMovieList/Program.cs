@@ -60,6 +60,7 @@ builder.Services.AddDbContext<ApiDbContext>(opt =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
 {
     opt.SignIn.RequireConfirmedAccount = false;
+    opt.User.RequireUniqueEmail = true;
 
     opt.Password.RequireDigit = false;
     opt.Password.RequireLowercase = false;

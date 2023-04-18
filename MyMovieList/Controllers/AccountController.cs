@@ -85,10 +85,10 @@ public class AccountController : ControllerBase
             return NotFound();
         }
 
-        if (!await _userManager.IsInRoleAsync(loggedUser!, UserRoles.SuperAdmin) ||
-            !await _userManager.IsInRoleAsync(loggedUser!, UserRoles.Admin) ||
-            (await _userManager.IsInRoleAsync(loggedUser!, UserRoles.Admin) && await _userManager.IsInRoleAsync(user, UserRoles.Admin)) ||
-            loggedUser!.Id != userId)
+        if (!await _userManager.IsInRoleAsync(loggedUser!, UserRoles.SuperAdmin) &&
+            !await _userManager.IsInRoleAsync(loggedUser!, UserRoles.Admin) &&
+            loggedUser!.Id != userId ||
+            (await _userManager.IsInRoleAsync(loggedUser!, UserRoles.Admin) && await _userManager.IsInRoleAsync(user, UserRoles.Admin)))
         {
             return Unauthorized("Only the proprietor of the account or users with higher priviledges can delete this account.");
         }
