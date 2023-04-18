@@ -60,6 +60,22 @@ public class WatchListController : ControllerBase
         return Ok();
     }
 
+    [HttpPost("[action]")]
+    public async Task<IActionResult> EditWatchListItemStatus(Guid movieId, WatchStatus watchStatus)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var movie = await _movieService.Get(movieId);
+
+        if (movie is null)
+        {
+            return NotFound("The movie specified was not found.");
+        }
+
+        await _watchListService.EditWatchListItemStatus(user!.Id, movieId, watchStatus);
+
+        return Accepted();
+    }
+
     [HttpDelete("[action]")]
     public async Task<IActionResult> RemoveFromWatchList(Guid movieId)
     {
